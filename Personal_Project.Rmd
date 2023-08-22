@@ -1,0 +1,185 @@
+---
+title: "Personal_Project"
+output: html_document
+date: "2023-08-18"
+---
+
+```{r}
+# Install and load necessary packages
+if (!require(randomForest)) {
+  # Check if the package 'randomForest' is installed; if not, install it
+  install.packages("randomForest", dependencies = TRUE)
+}
+library(randomForest)  # Load the 'randomForest' package for random forest modeling
+
+# Set a seed for reproducibility
+set.seed(123)  # Ensures that random processes in the script are replicable
+
+# Generate a synthetic dataset
+num_samples <- 1000  # Define the number of samples/data points
+
+# Generate random data for each attribute:
+customer_id <- 1:num_samples  # Unique ID for each customer
+age <- sample(18:70, num_samples, replace = TRUE)  # Randomly sample ages between 18 and 70
+credit_score <- sample(300:850, num_samples, replace = TRUE)  # Random credit scores between 300 and 850
+loan_amount <- sample(1000:50000, num_samples, replace = TRUE)  # Random loan amounts between 1000 and 50000
+employment_years <- sample(0:40, num_samples, replace = TRUE)  # Random employment duration between 0 and 40 years
+income <- sample(20000:150000, num_samples, replace = TRUE)  # Random income values between 20000 and 150000
+default <- factor(sample(c("No", "Yes"), num_samples, replace = TRUE), levels = c("No", "Yes"))  # Random 'default' status (Yes/No)
+
+# Combine the generated data into a single data frame:
+loan_data <- data.frame(
+  customer_id,
+  age,
+  credit_score,
+  loan_amount,
+  employment_years,
+  income,
+  default
+)
+
+# Split the data into training (70%) and test (30%) sets
+sample_index <- sample(seq_len(nrow(loan_data)), size = 0.7 * nrow(loan_data))  # Randomly select 70% of data for training
+train_data <- loan_data[sample_index, ]  # Create training set
+test_data <- loan_data[-sample_index, ]  # Create test set (remaining 30%)
+
+# Fit the random forest model on training data
+rf_model <- randomForest(default ~ . - customer_id, data = train_data, ntree = 100)
+# Uses 'randomForest' to build a model predicting 'default' based on all features except 'customer_id' with 100 trees
+
+# Predict on the test set
+predictions <- predict(rf_model, test_data)  # Get model's predictions on test set
+
+# Calculate the accuracy on the test set
+accuracy <- sum(predictions == test_data$default) / nrow(test_data)  # Calculate accuracy by comparing predictions to actual values
+print(paste("Accuracy on test set:", accuracy))  # Print the accuracy result
+```
+```{r}
+# Install and load necessary packages
+if (!require(randomForest)) {
+  # Check if the package 'randomForest' is installed; if not, install it
+  install.packages("randomForest", dependencies = TRUE)
+}
+library(randomForest)  # Load the 'randomForest' package for using random forest algorithms
+
+# Set a seed for reproducibility
+set.seed(123)  # Ensures consistent randomness for replicable results
+
+# Generate a synthetic dataset
+num_samples <- 1000  # Define the total number of data points or samples
+
+# Generate individual attributes for the dataset:
+customer_id <- 1:num_samples  # Create a unique ID for each customer
+age <- sample(18:70, num_samples, replace = TRUE)  # Randomly sample ages between 18 and 70
+
+# Changed range for credit scores to reflect higher credit scores
+credit_score <- sample(500:850, num_samples, replace = TRUE)
+
+# Modified the range for loan amounts to represent higher loans
+loan_amount <- sample(5000:80000, num_samples, replace = TRUE)
+
+# Adjusted employment years for more realistic range (1 to 30 years)
+employment_years <- sample(1:30, num_samples, replace = TRUE)
+
+# Modified the income range to represent higher incomes
+income <- sample(30000:200000, num_samples, replace = TRUE)
+
+# Create a 'default' variable based on the relationships:
+# Customers with higher credit scores (> 700) and higher incomes (> 80000) are less likely to default
+default <- factor(ifelse(credit_score > 700 & income > 80000, "No", "Yes"), levels = c("No", "Yes"))
+
+# Aggregate the generated attributes into a single dataframe:
+loan_data <- data.frame(
+  customer_id,
+  age,
+  credit_score,
+  loan_amount,
+  employment_years,
+  income,
+  default
+)
+
+# Split the data into training (70%) and test (30%) sets
+sample_index <- sample(seq_len(nrow(loan_data)), size = 0.7 * nrow(loan_data))  # Randomly select 70% of data for training
+train_data <- loan_data[sample_index, ]  # Extract the training set based on the sampled indices
+test_data <- loan_data[-sample_index, ]  # Use the remaining 30% for the test set
+
+# Train the random forest model
+rf_model <- randomForest(default ~ . - customer_id, data = train_data, ntree = 100)
+# Train the model to predict 'default' using all attributes except 'customer_id'; use 100 decision trees
+
+# Make predictions on the test set
+predictions <- predict(rf_model, test_data)  # Apply the trained model on test set to get predictions
+
+# Calculate the accuracy of the model on the test set
+accuracy <- sum(predictions == test_data$default) / nrow(test_data)  # Compute accuracy by comparing predicted vs. actual 'default' values
+print(paste("Accuracy on test set:", accuracy))  # Print the accuracy result
+```
+In this version of the synthetic dataset, I've introduced stronger relationships between credit_score and income with the default variable. Customers with higher credit scores and higher incomes are less likely to default. These relationships should lead to a higher accuracy in the Random Forest model's predictions. Please note that synthetic data can only approximate real-world relationships, and actual data quality depends on the relevance of features and relationships to the target variable.
+
+The reported accuracy of 90% is likely due to the stronger relationships between the features and the target variable (default) that were introduced in the improved synthetic dataset. When the features in the dataset have a strong predictive power with respect to the target variable, the model can more effectively distinguish between the different classes and make accurate predictions.
+
+In the improved dataset, the conditions for a customer to be classified as "No" (not defaulting) are based on higher credit scores and higher incomes. These conditions are applied consistently, leading to a clear separation of customers who are more likely to default from those who are not. As a result, the Random Forest model can learn and capture these relationships effectively, leading to the higher reported accuracy.
+
+It's important to note that synthetic datasets are carefully constructed to exhibit certain relationships, and real-world data may be more complex and noisy. While the high accuracy on the synthetic dataset is promising, it's essential to test the model on real-world data to ensure its performance holds up in more varied and challenging scenarios.
+
+```{r}
+# Save the loan_data dataset to a CSV file
+write.csv(loan_data, "loan_data.csv", row.names = FALSE)
+```
+
+```{r}
+# Install and load necessary packages
+if (!require(randomForest)) {
+  install.packages("randomForest", dependencies = TRUE)
+}
+library(randomForest)
+
+# Fit the random forest model on the entire dataset
+rf_model <- randomForest(default ~ . - customer_id, data = loan_data, ntree = 100)
+
+# Plot feature importances
+varImpPlot(rf_model)
+```
+```{r}
+# Load the ggplot2 package
+library(ggplot2)
+
+# Define the features that we want to evaluate and some constants for the loop
+features <- c("credit_score", "income", "age", "loan_amount", "employment_years")
+num_epochs <- 10
+epoch_step <- 10  # How many trees to add for each epoch
+
+# Initialize a matrix to store accuracy for each feature over the epochs
+accuracies <- matrix(0, nrow = num_epochs, ncol = length(features))
+
+# Train the model for each feature separately
+# Evaluate the model accuracy over an increasing number of trees (epochs)
+for (j in 1:length(features)) {
+  for (i in 1:num_epochs) {
+    n_trees <- i * epoch_step  # Number of trees in the forest for the current epoch
+    formula <- as.formula(paste("default ~", features[j]))  # Create a formula for the current feature
+    rf_single_feature <- randomForest(formula, data = train_data, ntree = n_trees)  # Train a RF model
+    predictions <- predict(rf_single_feature, test_data)  # Predict on the test set using the current model
+    accuracies[i, j] <- sum(predictions == test_data$default) / nrow(test_data)  # Compute the accuracy and store it
+  }
+}
+
+# Convert the accuracy matrix to a data frame for plotting
+accuracy_df <- as.data.frame(accuracies)
+accuracy_df$Epoch <- 1:num_epochs  # Add an Epoch column to the data frame
+
+# Melt the data frame to a long format suitable for ggplot2
+library(reshape2)
+accuracy_melted <- melt(accuracy_df, id.vars = "Epoch")
+
+# Plot the results using ggplot2
+p <- ggplot(accuracy_melted, aes(x = Epoch, y = value, color = variable)) +
+  geom_line(size = 1) +
+  labs(title = "Accuracy of RF Model over Epochs", x = "Epoch", y = "Accuracy") +
+  theme_minimal() +
+  scale_color_discrete(name = "Features", labels = features)  # Adjust the color scale to use actual feature names
+
+print(p)  # Display the plot
+```
+
